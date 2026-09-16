@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4d6bfe">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DSH 指南">
+<title>DeepSeek Harness 使用指南</title>
+<meta name="description" content="面向使用者的 DeepSeek Harness（dsh）入门指南：三分钟上手、基础词汇、Token 与费用、缓存命中、提示词写法、常见问题。">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f6f7f9;
+    --bg-code: #f3f4f7;
+    --fg: #1c1f23;
+    --fg-soft: #5b6470;
+    --fg-faint: #8b939e;
+    --line: #e4e7ec;
+    --accent: #4d6bfe;
+    --accent-soft: #eef1ff;
+    --warn-bg: #fff8e6;
+    --warn-line: #f0c96b;
+    --good-bg: #edfaf1;
+    --good-line: #7fcf9d;
+    --bad-bg: #fdf0f0;
+    --bad-line: #e79b9b;
+    --radius: 10px;
+    --sidebar: 232px;
+  }
+  html[data-theme="dark"] {
+    --bg: #16181d;
+    --bg-soft: #1d2026;
+    --bg-code: #1d2026;
+    --fg: #e6e8ec;
+    --fg-soft: #a7aeb9;
+    --fg-faint: #7c848f;
+    --line: #2c313a;
+    --accent: #7c93ff;
+    --accent-soft: #232a42;
+    --warn-bg: #2b2618;
+    --warn-line: #6b5a25;
+    --good-bg: #182a20;
+    --good-line: #2f5c40;
+    --bad-bg: #2c1c1c;
+    --bad-line: #6b3737;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---------- 布局 ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    gap: 44px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+    border-right: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
+  .brand .dot {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--accent); flex: none;
+  }
+  .brand strong { font-size: 15px; letter-spacing: .2px; }
+  .brand-sub { font-size: 12px; color: var(--fg-faint); margin: 0 0 20px 20px; }
+  .toc { list-style: none; margin: 0; padding: 0; }
+  .toc li { margin: 0; }
+  .toc a {
+    display: block;
+    padding: 5px 10px;
+    border-radius: 7px;
+    color: var(--fg-soft);
+    font-size: 14px;
+    border-left: 2px solid transparent;
+  }
+  .toc a:hover { background: var(--bg-soft); color: var(--fg); text-decoration: none; }
+  .toc a.active {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+  .sidebar-foot { margin-top: 22px; padding-left: 10px; font-size: 12px; color: var(--fg-faint); }
+  .theme-btn {
+    margin: 16px 0 0 10px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--fg-soft);
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+  .theme-btn:hover { color: var(--fg); }
+
+  main { padding: 40px 0 100px; min-width: 0; }
+
+  /* ---------- 标题与正文 ---------- */
+  h1 { font-size: 30px; line-height: 1.3; margin: 0 0 10px; letter-spacing: -.4px; }
+  h2 {
+    font-size: 22px; margin: 54px 0 14px; padding-top: 8px;
+    letter-spacing: -.2px; scroll-margin-top: 16px;
+  }
+  h2::before {
+    content: ""; display: inline-block; width: 4px; height: 17px;
+    background: var(--accent); border-radius: 2px;
+    margin-right: 10px; vertical-align: -2px;
+  }
+  h3 { font-size: 17px; margin: 30px 0 8px; }
+  h4 { font-size: 15px; margin: 20px 0 6px; color: var(--fg-soft); }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  li > ul, li > ol { margin: 4px 0; }
+  .lead { font-size: 17px; color: var(--fg-soft); }
+  .muted { color: var(--fg-soft); font-size: 14px; }
+  .faint { color: var(--fg-faint); font-size: 13px; }
+  hr { border: none; border-top: 1px solid var(--line); margin: 40px 0; }
+
+  code {
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 1px 5px;
+    font-family: "SFMono-Regular", Consolas, "Cascadia Mono", "Courier New", monospace;
+    font-size: 13.5px;
+    word-break: break-word;
+  }
+  kbd {
+    background: var(--bg-soft); border: 1px solid var(--line);
+    border-bottom-width: 2px; border-radius: 5px;
+    padding: 1px 6px; font-size: 12.5px;
+    font-family: inherit;
+  }
+
+  /* ---------- 代码块 ---------- */
+  .code-block { position: relative; margin: 14px 0; }
+  .code-block pre {
+    margin: 0;
+    background: var(--bg-code);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
+  .code-block pre code {
+    background: none; border: none; padding: 0; font-size: 13.5px;
+    white-space: pre; word-break: normal;
+  }
+  .code-block .copy {
+    position: absolute; top: 8px; right: 8px;
+    font: inherit; font-size: 12px;
+    padding: 3px 9px; cursor: pointer;
+    color: var(--fg-soft);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    opacity: .75;
+  }
+  .code-block .copy:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+
+  /* ---------- 卡片/提示 ---------- */
+  .card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin: 14px 0;
+    background: var(--bg-soft);
+  }
+  .note { border-left: 3px solid var(--accent); }
+  .note.warn { border-left-color: var(--warn-line); background: var(--warn-bg); }
+  .note.good { border-left-color: var(--good-line); background: var(--good-bg); }
+  .note.bad  { border-left-color: var(--bad-line);  background: var(--bad-bg); }
+  .note p:first-child { margin-top: 0; }
+  .note p:last-child { margin-bottom: 0; }
+
+  /* 好/坏例子 */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare .box {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 12px 16px; font-size: 14.5px;
+  }
+  .compare .box h4 { margin: 0 0 6px; font-size: 14px; }
+  .compare .bad-side { background: var(--bad-bg); border-color: var(--bad-line); }
+  .compare .good-side { background: var(--good-bg); border-color: var(--good-line); }
+  .compare .box p { margin: 6px 0; }
+
+  /* ---------- 表格 ---------- */
+  .table-wrap { overflow-x: auto; margin: 14px 0; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14.5px;
+    min-width: 480px;
+  }
+  th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--bg-soft); font-weight: 600; white-space: nowrap; }
+  tbody tr:nth-child(even) { background: color-mix(in srgb, var(--bg-soft) 45%, transparent); }
+
+  /* ---------- 词汇卡片 ---------- */
+  .vocab { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin: 18px 0; }
+  .vocab .v {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 16px; background: var(--bg);
+  }
+  .vocab .v .term { font-weight: 700; font-size: 15.5px; }
+  .vocab .v .en { color: var(--fg-faint); font-size: 12.5px; margin-left: 6px; font-weight: 400; }
+  .vocab .v p { margin: 7px 0 0; font-size: 14.5px; color: var(--fg-soft); }
+  .vocab .v p.analogy {
+    color: var(--fg); font-size: 14px;
+    border-top: 1px dashed var(--line); padding-top: 7px; margin-top: 9px;
+  }
+  .vocab .v p.analogy::before { content: "打个比方："; color: var(--accent); font-weight: 600; }
+
+  /* ---------- 步骤 ---------- */
+  .steps { list-style: none; padding: 0; counter-reset: step; margin: 16px 0; }
+  .steps > li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 4px 42px;
+    margin: 0 0 20px;
+  }
+  .steps > li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 1px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    font-weight: 700; font-size: 13.5px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps > li > strong:first-child { display: block; margin-bottom: 2px; }
+
+  /* ---------- 速查筛选 ---------- */
+  .filter {
+    width: 100%; max-width: 380px;
+    font: inherit; font-size: 14.5px;
+    padding: 8px 12px; margin: 6px 0 14px;
+    color: var(--fg); background: var(--bg-soft);
+    border: 1px solid var(--line); border-radius: 8px;
+  }
+  .filter:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .empty-hint { color: var(--fg-faint); font-size: 14px; display: none; }
+
+  .to-top {
+    position: fixed; right: 22px; bottom: 22px;
+    width: 40px; height: 40px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    background: var(--bg); color: var(--fg-soft);
+    border: 1px solid var(--line); cursor: pointer;
+    font-size: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  }
+  .to-top.show { display: flex; }
+
+  /* ---------- 手机端顶栏 ---------- */
+  .mobile-bar {
+    display: none;
+    position: sticky; top: 0; z-index: 30;
+    align-items: center; justify-content: space-between;
+    gap: 10px;
+    padding: 10px 18px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .mobile-bar .mb-title { font-weight: 700; font-size: 15px; letter-spacing: .2px; }
+  .menu-btn {
+    font: inherit; font-size: 14px;
+    padding: 7px 14px; cursor: pointer;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .menu-btn:active { transform: scale(.97); }
+
+  footer {
+    margin-top: 60px; padding-top: 22px;
+    border-top: 1px solid var(--line);
+    color: var(--fg-faint); font-size: 13px;
+  }
+
+  @media (max-width: 900px) {
+    .mobile-bar { display: flex; }
+    .layout { grid-template-columns: 1fr; gap: 0; padding: 0 18px; }
+    .sidebar {
+      position: static; max-height: none; border-right: none;
+      border-bottom: 1px solid var(--line);
+      padding: 6px 0 12px;
+      display: none;
+    }
+    .sidebar.open { display: block; }
+    .brand, .brand-sub { display: none; }
+    .toc { display: block; }
+    .toc a { padding: 10px 12px; border-left: none; font-size: 15px; }
+    .theme-btn { margin: 10px 0 0 12px; }
+    .sidebar-foot { padding-left: 12px; }
+    main { padding-top: 22px; }
+    h1 { font-size: 25px; }
+    h2 { font-size: 20px; margin-top: 42px; scroll-margin-top: 74px; }
+    h3 { scroll-margin-top: 74px; }
+    .compare { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 15.5px; }
+    .layout { padding: 0 14px; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 18.5px; }
+    h3 { font-size: 16px; }
+    .steps > li { padding-left: 36px; }
+    .code-block pre { font-size: 12.5px; padding: 12px 12px; }
+    .code-block pre code { font-size: 12.5px; }
+    .code-block .copy { top: 6px; right: 6px; font-size: 11px; padding: 3px 7px; }
+    .vocab { grid-template-columns: 1fr; }
+    table { min-width: 420px; font-size: 14px; }
+    th, td { padding: 7px 9px; }
+    .to-top { right: 14px; bottom: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="mobile-bar">
+  <span class="mb-title">DSH 使用指南</span>
+  <button class="menu-btn" id="menuBtn" type="button" aria-controls="sidebar" aria-expanded="false">目录 ▾</button>
+</div>
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="dot"></span><strong>DSH 使用指南</strong></div>
+    <p class="brand-sub">DeepSeek Harness 上手指南</p>
+    <nav>
+      <ul class="toc">
+        <li><a href="#start">01 · 三分钟上手</a></li>
+        <li><a href="#modes">02 · 几种启动方式</a></li>
+        <li><a href="#words">03 · 基础词汇</a></li>
+        <li><a href="#token">04 · Token 与费用</a></li>
+        <li><a href="#cache">05 · 缓存命中</a></li>
+        <li><a href="#prompt">06 · 怎么写提示词</a></li>
+        <li><a href="#templates">07 · 提示词模板</a></li>
+        <li><a href="#lingo">08 · AI 常用语速查</a></li>
+        <li><a href="#faq">09 · 常见问题</a></li>
+        <li><a href="#safety">10 · 安全与好习惯</a></li>
+        <li><a href="#refs">11 · 参考资料</a></li>
+      </ul>
+    </nav>
+    <button class="theme-btn" id="themeBtn" type="button">切换深色</button>
+    <div class="sidebar-foot">内容更新：2026-09-16</div>
+  </aside>
+
+  <main>
+    <h1>DeepSeek Harness 使用指南</h1>
+    <p class="lead">
+      写给使用者，不写给开发者。读完这一页，你会知道 dsh 是什么、怎么跑起来、
+      Agent / Token / 缓存命中这些词到底在说什么，以及什么样的提示词能让它把活干对。
+    </p>
+    <p class="muted">
+      本指南基于 DeepSeek Harness 开发者预览版（<code>@deepseek-ai/dsh 0.1.5-rc.1</code>）
+      与 DeepSeek 官方文档整理。这个项目在快速迭代，界面和价格都可能变，
+      涉及具体数字时请以官方文档为准。
+    </p>
+
+    <div class="card note">
+      <p><strong>一句话认识 dsh：</strong>它是一个「智能体框架（agent harness）」。
+      模型本身只会说话，dsh 给模型配上了手和脚——读写文件、执行命令、搜索网页、开子代理干活，
+      并且在你授权的前提下动手。它自己也是一个网页应用，跑在本机 <code>127.0.0.1:3080</code>。</p>
+    </div>
+
+    <!-- ================= 01 ================= -->
+    <h2 id="start">01 · 三分钟上手</h2>
+
+    <ol class="steps">
+      <li>
+        <strong>确认环境</strong>
+        需要安装 <strong>Node.js</strong>（建议 20 或更高版本）。在终端执行 <code>node -v</code> 能看到版本号即可。
+      </li>
+      <li>
+        <strong>启动 Web 界面</strong>
+        <div class="code-block">
+          <pre><code>npx @deepseek-ai/dsh web</code></pre>
+        </div>
+        <p class="muted">默认在 <code>http://127.0.0.1:3080</code> 启动，本机启动时通常会自动打开浏览器。
+        如果不想自动打开，加上 <code>--no-open</code>。关掉终端窗口，服务就停了。</p>
+      </li>
+      <li>
+        <strong>填模型密钥</strong>
+        打开左侧的<strong>设置 → 模型</strong>，填入 DeepSeek API Key 并保存。
+        密钥在 <a href="https://platform.deepseek.com/" target="_blank" rel="noopener">platform.deepseek.com</a> 申请。
+        <p class="muted">保存后模型路由立刻可用，不需要重启服务。</p>
+      </li>
+      <li>
+        <strong>选择工作区</strong>
+        点击<strong>选择工作区</strong>，把项目目录添加进来并选中。
+        <p class="muted">工作区就是 Agent 的「办公桌」——它默认只能在这张桌子上翻箱倒柜。
+        注意：<strong>没选中工作区之前，输入框是不可用的。</strong>
+        如果在终端里已经 <code>cd</code> 到项目目录再启动，那一层目录会成为默认的文件系统位置。</p>
+      </li>
+      <li>
+        <strong>发第一个任务</strong>
+        新建会话，直接说人话，例如：
+        <div class="code-block">
+          <pre><code>帮我通读这个项目，告诉我它有哪些主要模块，各自负责什么。先不要改任何文件。</code></pre>
+        </div>
+      </li>
+      <li>
+        <strong>看懂「审批」</strong>
+        当某个操作需要你点头时，界面会停下来问你。同意它就继续，拒绝它就换条路走。
+        <p class="muted">这是安全设计，不是卡住了。你随时可以撤销授权或改变策略。</p>
+      </li>
+    </ol>
+
+    <div class="card note warn">
+      <p><strong>第一次使用请先记住三条：</strong></p>
+      <ul>
+        <li>它会真的改你的文件、真的执行命令，所以<strong>重要资料先备份</strong>或者在别处试。</li>
+        <li>不确定的活，就告诉它「先只读不改」，看它分析得对不对再放行。</li>
+        <li>API Key 是花钱的钥匙，不要贴进聊天内容里，也不要提交到代码仓库。</li>
+      </ul>
+    </div>
+
+    <!-- ================= 02 ================= -->
+    <h2 id="modes">02 · 几种启动方式</h2>
+    <p>同一个 <code>dsh</code>，换个参数就是另一种用途。刚上手只需要知道第一种。</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>命令</th><th>用途</th><th>适合谁</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>dsh web</code></td>
+            <td>启动网页界面，日常使用的主入口</td>
+            <td>所有人</td>
+          </tr>
+          <tr>
+            <td><code>dsh --profile headless "任务"</code></td>
+            <td>跑一个一次性会话，把最终答案打印出来就退出</td>
+            <td>想写进脚本、定时任务的人</td>
+          </tr>
+          <tr>
+            <td><code>dsh --profile acp</code></td>
+            <td>通过 ACP 协议为编辑器等自动化客户端提供服务</td>
+            <td>把 dsh 当后端接进别的工具</td>
+          </tr>
+          <tr>
+            <td><code>dsh --profile sdk</code></td>
+            <td>通过 JSON-RPC 为 SDK 客户端提供服务</td>
+            <td>用代码调用 Agent 的开发者</td>
+          </tr>
+          <tr>
+            <td><code>dsh plugin --profile web &lt;pnpm 参数&gt;</code></td>
+            <td>给某个 profile 安装或卸载插件</td>
+            <td>想扩展功能的人</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">
+      「profile」是 dsh 的一种启动配置集合（可以理解成「预设」）。不同的 profile 装载不同的插件组合，
+      互不干扰，所以你能一边用网页版，一边写脚本用无头版。
+    </p>
+
+    <!-- ================= 03 ================= -->
+    <h2 id="words">03 · 基础词汇</h2>
+    <p>
+      下面这些词，你会在聊天记录、教程和报错里反复看到。每条都给你一句人话解释和一个比喻，
+      看不懂的部分可以跳过，用到的时候再回来查。
+    </p>
+
+    <div class="vocab">
+      <div class="v">
+        <span class="term">智能体</span><span class="en">Agent</span>
+        <p>不只是「会聊天的模型」，而是能自己规划步骤、调用工具、看结果、再决定下一步的模型。</p>
+        <p class="analogy">实习生。你交代目标，他自己找路径干活，中间会来问你拿主意。</p>
+      </div>
+      <div class="v">
+        <span class="term">框架</span><span class="en">Harness</span>
+        <p>给模型装上「手和脚」的那层外壳：工具、权限、记忆、界面都归它管。dsh 就是 DeepSeek 的 harness。</p>
+        <p class="analogy">工人的工位和工具台。模型是工人，Harness 决定他能拿到哪些工具。</p>
+      </div>
+      <div class="v">
+        <span class="term">模型与服务商</span><span class="en">Model / Provider</span>
+        <p>模型是「大脑」（如 deepseek-flash、deepseek-v4-pro），服务商是提供这个大脑的公司或接口地址。</p>
+        <p class="analogy">模型是发动机型号，服务商是加油站。</p>
+      </div>
+      <div class="v">
+        <span class="term">Token</span><span class="en">Token</span>
+        <p>模型读写文字的<strong>最小计费单位</strong>，可以粗略当成「字」或「词」。输入和输出都按 token 数收钱。</p>
+        <p class="analogy">打车的「公里数」。内容越长，跳表越快。</p>
+      </div>
+      <div class="v">
+        <span class="term">上下文 / 上下文窗口</span><span class="en">Context / Context Window</span>
+        <p>模型这一次能看到的所有内容：系统提示、历史对话、你贴的文件、工具返回的结果。窗口就是上限。</p>
+        <p class="analogy">摆在桌面上的材料。桌子只有这么大，摆满了就得收走一部分旧纸。</p>
+      </div>
+      <div class="v">
+        <span class="term">系统提示词</span><span class="en">System Prompt</span>
+        <p>每次请求都排在最前面的固定说明，规定它的身份、规矩和可用工具。用户一般不用自己写。</p>
+        <p class="analogy">员工手册的第一页，每天上班都先读到它。</p>
+      </div>
+      <div class="v">
+        <span class="term">工具 / 工具调用</span><span class="en">Tool / Tool Call</span>
+        <p>模型能调用的具体能力，比如读文件、跑命令行、搜网页。模型不直接执行，而是「提出调用」，由程序执行后把结果还给它。</p>
+        <p class="analogy">点外卖。它只能下单，饭是骑手（程序）送来的。</p>
+      </div>
+      <div class="v">
+        <span class="term">技能</span><span class="en">Skill</span>
+        <p>预置的专业操作手册，遇到特定任务时才加载进上下文，避免每次都把一大本说明书塞给它。</p>
+        <p class="analogy">工具箱里贴了标签的专项手册，用到哪本抽哪本。</p>
+      </div>
+      <div class="v">
+        <span class="term">审批</span><span class="en">Approval</span>
+        <p>敏感操作（删文件、装软件、联外网）前先征求你同意的机制。你可以在界面上同意或拒绝。</p>
+        <p class="analogy">财务报销要签字。金额越大，越需要你本人点头。</p>
+      </div>
+      <div class="v">
+        <span class="term">沙箱</span><span class="en">Sandbox</span>
+        <p>限制 Agent 活动范围的围栏。比如「只能改工作区里的文件」，出了圈就会被拦下并报错。</p>
+        <p class="analogy">儿童活动区的软围栏。撞上去不会受伤，但也过不去。</p>
+      </div>
+      <div class="v">
+        <span class="term">会话 / 工作区</span><span class="en">Session / Workspace</span>
+        <p>会话是一次连续的对话（有记忆、能恢复）；工作区是它允许读写的目录范围。</p>
+        <p class="analogy">会话是「这次会议」，工作区是「这间办公室」。</p>
+      </div>
+      <div class="v">
+        <span class="term">插件</span><span class="en">Plugin</span>
+        <p>dsh 的功能单元。它的设计理念是「一切皆插件」——工具、界面、模型接入都是插件，可以增删和组合。</p>
+        <p class="analogy">乐高积木。整台机器由一块块积木拼出来，也能拆下来换掉。</p>
+      </div>
+      <div class="v">
+        <span class="term">预设 / Profile</span><span class="en">Preset / Profile</span>
+        <p>一整套插件与配置的打包。换一个 profile，就换了一套能力组合，彼此不影响。</p>
+        <p class="analogy">不同的工作模式：办公模式、游戏模式、省电模式。</p>
+      </div>
+      <div class="v">
+        <span class="term">子代理</span><span class="en">Subagent</span>
+        <p>主 Agent 派出去的小分队。它有自己的上下文，干完只回报结论，不把过程垃圾倒回主对话。</p>
+        <p class="analogy">派同事去仓库盘点，回来只交一张清单。</p>
+      </div>
+      <div class="v">
+        <span class="term">计划 / 待办 / 目标</span><span class="en">Plan / Todo / Goal</span>
+        <p>三种管进度的手段：计划是先写方案给你审，待办是任务清单，目标是跨多轮持续推进的一件大事。</p>
+        <p class="analogy">计划是施工图，待办是今日清单，目标是「这个月盖完这栋楼」。</p>
+      </div>
+      <div class="v">
+        <span class="term">上下文压缩</span><span class="en">Compaction</span>
+        <p>对话太长、快塞满窗口时，把旧内容总结成摘要，腾出空间继续干。</p>
+        <p class="analogy">笔记本写满了，先抄一页重点，再撕掉草稿。</p>
+      </div>
+      <div class="v">
+        <span class="term">推理强度</span><span class="en">Reasoning Effort</span>
+        <p>模型「想多久」的档位。调高更擅长复杂推理，但更慢更贵；调低更快更省，适合简单任务。</p>
+        <p class="analogy">考试时打草稿的认真程度。</p>
+      </div>
+      <div class="v">
+        <span class="term">温度</span><span class="en">Temperature</span>
+        <p>控制输出随机性的参数。低温度更稳定保守，高温度更发散有创意。日常干活一般用默认值就好。</p>
+        <p class="analogy">做菜的「火候」：小火稳定，大火出花但也容易翻车。</p>
+      </div>
+      <div class="v">
+        <span class="term">幻觉</span><span class="en">Hallucination</span>
+        <p>模型一本正经地说错话，比如编造不存在的函数名、文件和引用。</p>
+        <p class="analogy">自信的实习生凭印象写报告，没去查原始资料。</p>
+      </div>
+      <div class="v">
+        <span class="term">缓存命中</span><span class="en">Cache Hit</span>
+        <p>这次请求的输入前缀，和之前某次请求重复，重复部分可以直接从缓存读取，价格便宜很多。</p>
+        <p class="analogy">同一份资料第二次复印，不用重新排版，直接过机。</p>
+      </div>
+    </div>
+
+    <!-- ================= 04 ================= -->
+    <h2 id="token">04 · Token 与费用</h2>
+
+    <h3>Token 到底是什么</h3>
+    <p>
+      Token 是模型处理文字的最小单位，也是计费单位。它不等于「字」，因为模型有自己的切词方式。
+      官方给出的换算经验值是：
+    </p>
+    <ul>
+      <li>1 个英文字符 ≈ <strong>0.3</strong> 个 token</li>
+      <li>1 个中文字符 ≈ <strong>0.6</strong> 个 token</li>
+    </ul>
+    <p class="muted">
+      也就是说，1000 个汉字大约是 600 个 token。不同模型切词方式不同，
+      精确数字以接口返回结果里的 <code>usage</code> 字段为准。
+    </p>
+
+    <h3>三个容量数字</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>项目</th><th>数值</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>上下文长度</td><td>1M tokens</td><td>模型一次能「看到」的总上限，约合一百六十多万汉字</td></tr>
+          <tr><td>最大输出长度</td><td>384K tokens</td><td>单次回答能写多长</td></tr>
+          <tr><td>计费口径</td><td>输入 + 输出</td><td>输入按缓存是否命中分两档计价，输出单独一档</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>价格对照（2026-09-16 官方页面）</h3>
+    <p class="muted">单位：元 / 百万 tokens。空闲时段为高峰时段的一半，高峰时段是北京时间周一至周五 9:00–12:00、14:00–18:00。</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>模型</th><th>输入（缓存命中）</th><th>输入（缓存未命中）</th><th>输出</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>deepseek-flash · 空闲</td><td>0.02</td><td>1</td><td>4</td></tr>
+          <tr><td>deepseek-flash · 高峰</td><td>0.04</td><td>2</td><td>8</td></tr>
+          <tr><td>deepseek-v4-pro · 空闲</td><td>0.15</td><td>4.5</td><td>13.5</td></tr>
+          <tr><td>deepseek-v4-pro · 高峰</td><td>0.30</td><td>9.0</td><td>27.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card note warn">
+      <p>模型名称与价格可能调整。较新的模型名请以官方<a href="https://api-docs.deepseek.com/zh-cn/quick_start/pricing" target="_blank" rel="noopener">「模型 &amp; 价格」</a>页面为准。</p>
+    </div>
+
+    <h3>费用怎么算：一个真实例子</h3>
+    <p>公式很简单：</p>
+    <div class="code-block">
+      <pre><code>费用 = 命中 token 数 × 命中单价
+     + 未命中 token 数 × 未命中单价
+     + 输出 token 数 × 输出单价</code></pre>
+    </div>
+    <p>假设一次任务：输入 20 万 tokens（其中 19 万命中缓存、1 万未命中），输出 5000 tokens，用 deepseek-flash 的空闲时段价格：</p>
+    <ul>
+      <li>命中：190,000 ÷ 1,000,000 × 0.02 = <strong>0.0038 元</strong></li>
+      <li>未命中：10,000 ÷ 1,000,000 × 1 = <strong>0.01 元</strong></li>
+      <li>输出：5,000 ÷ 1,000,000 × 4 = <strong>0.02 元</strong></li>
+      <li>合计约 <strong>0.034 元</strong></li>
+    </ul>
+    <p>
+      注意这里的对比有多悬殊：19 万个命中 token 只花了 0.0038 元，
+      而 1 万个未命中 token 花了 0.01 元。<strong>省钱的真正抓手是缓存命中率，不是少问几句话。</strong>
+    </p>
+
+    <h3>省钱五条</h3>
+    <ol>
+      <li><strong>同一个话题别开新会话。</strong>新会话等于缓存全部作废，前面读过的文件要重新算一遍钱。</li>
+      <li><strong>任务描述一次给足。</strong>挤牙膏式提问会让模型反复重读上下文，每一轮都在重复付费。</li>
+      <li><strong>简单活用快模型、低推理强度。</strong>别拿大炮打蚊子。</li>
+      <li><strong>长任务拆成几步。</strong>每步都有明确产出，出错时不用从头再来。</li>
+      <li><strong>避免无意义的超长粘贴。</strong>贴之前先删掉无关部分，或者直接让它自己去读那个文件（读文件的结果同样能被缓存复用）。</li>
+    </ol>
+
+    <!-- ================= 05 ================= -->
+    <h2 id="cache">05 · 缓存命中：最容易被忽略的一笔钱</h2>
+
+    <div class="card note good">
+      <p><strong>核心结论：</strong>DeepSeek 的上下文硬盘缓存<strong>默认对所有用户开启</strong>，
+      你不需要改任何设置。命中缓存的输入 token，单价大约只有未命中的 <strong>1/50</strong>。</p>
+    </div>
+
+    <h3>它是怎么工作的</h3>
+    <p>
+      每一次请求都会触发缓存构建。如果这次请求和之前某次请求在<strong>前缀</strong>上重复，
+      重复的部分就能直接从硬盘缓存读出来，这部分计入「缓存命中」。
+      关键在于：缓存按「缓存前缀单元」整块匹配，<strong>必须完整对上才算命中</strong>，对上九成也不算。
+    </p>
+
+    <h4>缓存什么时候落盘</h4>
+    <ul>
+      <li><strong>请求结束位置落盘：</strong>每次请求的「用户输入结束处」和「模型输出结束处」各形成一个缓存前缀单元。后续请求完整匹配到它就能命中。</li>
+      <li><strong>公共前缀检测落盘：</strong>系统发现多次请求有共同前缀时，会把这个公共前缀单独存成一个单元。</li>
+      <li><strong>按固定 token 间隔落盘：</strong>超长输入或输出中，系统会隔一段 token 就切一个单元存下来，避免长内容因为没走到结尾而完全无法被利用。</li>
+    </ul>
+
+    <h3>两个例子，一看就懂</h3>
+    <div class="compare">
+      <div class="box good-side">
+        <h4>例一：多轮对话 → 直接命中</h4>
+        <p>第 1 轮你发了 <code>A + B</code>。</p>
+        <p>第 2 轮你继续追问，请求内容是 <code>A + B + C</code>。</p>
+        <p>因为 <code>A + B</code> 完整匹配了上一次的前缀单元，<strong>这一部分命中缓存</strong>，只有 <code>C</code> 是未命中的。</p>
+      </div>
+      <div class="box bad-side">
+        <h4>例二：换问题 → 要等一轮才命中</h4>
+        <p>第 1 轮 <code>A + B</code>；第 2 轮 <code>A + C</code>。</p>
+        <p><code>A + C</code> 对不上 <code>A + B</code>，<strong>两轮都不命中</strong>。</p>
+        <p>但系统会识别出公共前缀 <code>A</code> 并落盘。等到第 3 轮发 <code>A + D</code> 时，<code>A</code> 就能命中了。</p>
+      </div>
+    </div>
+    <p class="muted">
+      例二的场景很典型：你上传一份长资料，然后反复问不同的问题。
+      前一两轮看不到便宜，从第三轮开始就明显划算了——所以别问一次就换资料，把同一份资料用透。
+    </p>
+
+    <h3>怎么提高命中率</h3>
+    <ol>
+      <li><strong>稳定的内容放在前面。</strong>系统提示、规则、固定的背景资料都应排在前面，变化的问题放在最后。</li>
+      <li><strong>别频繁改动前置内容。</strong>改一个字，后面整段前缀都对不上，全部重新计费。</li>
+      <li><strong>在同一个会话里延续话题。</strong>历史消息天然构成可命中的前缀。</li>
+      <li><strong>一次把材料给全。</strong>让它的输入前缀尽快稳定下来，之后的轮次都在复用它。</li>
+      <li><strong>不要为了「干净」而频繁重开会话。</strong>追求干净界面的代价可能是重复付费。</li>
+    </ol>
+
+    <h3>四个常见误解</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>误解</th><th>事实</th></tr></thead>
+        <tbody>
+          <tr><td>命中缓存 = 回答是复制粘贴的</td><td>缓存只作用于<strong>输入前缀</strong>，输出仍然是实时推理算出来的，受随机性影响，效果与不用缓存完全一致</td></tr>
+          <tr><td>缓存一定会命中</td><td>缓存是「尽力而为」，不保证 100% 命中</td></tr>
+          <tr><td>缓存会一直留着</td><td>缓存不再使用后会自动清空，通常是几个小时到几天</td></tr>
+          <tr><td>命中率低就是系统有 bug</td><td>多数情况是使用习惯造成的：频繁改前置内容、频繁开新会话、反复换材料</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="faint">
+      小提示：API 返回的 <code>usage</code> 里有两个字段——<code>prompt_cache_hit_tokens</code>（命中的 token 数）
+      与 <code>prompt_cache_miss_tokens</code>（未命中的 token 数）。想核算成本，看这两个数字最直接。
+    </p>
+
+    <!-- ================= 06 ================= -->
+    <h2 id="prompt">06 · 怎么写提示词</h2>
+
+    <p>
+      提示词（Prompt）就是你发给它的那段话。好消息是：和 Agent 打交道，
+      比和「只会聊天的模型」打交道简单——因为它能自己去查、自己动手，
+      你不需要把所有资料都塞进一段话里。
+    </p>
+
+    <div class="card note">
+      <p><strong>一个够用的公式：</strong></p>
+      <p><code>目标（要什么结果） + 范围（动哪里、别动哪里） + 约束（怎么做、不能怎么做） + 验收（怎样算做完）</code></p>
+    </div>
+
+    <h3>反面例子 vs 正面例子</h3>
+
+    <div class="compare">
+      <div class="box bad-side">
+        <h4>例子一 · 改代码</h4>
+        <p>「帮我优化一下这个项目。」</p>
+        <p class="faint">没说优化什么、动哪个目录、能不能重构、怎么算优化完。它只能猜，猜错你还得返工。</p>
+      </div>
+      <div class="box good-side">
+        <h4>例子一 · 改代码</h4>
+        <p>「把 <code>src/utils/date.ts</code> 里的日期格式化函数改成支持时区参数，保持原有函数签名兼容。</p>
+        <p>只改这个文件，不要动测试。</p>
+        <p>改完跑一遍 <code>npm test</code>，把命令和输出贴给我。」</p>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="box bad-side">
+        <h4>例子二 · 查资料</h4>
+        <p>「帮我查一下 AI 相关的最新进展。」</p>
+        <p class="faint">范围太大，结果一定是泛泛而谈，而且很难判断真假。</p>
+      </div>
+      <div class="box good-side">
+        <h4>例子二 · 查资料</h4>
+        <p>「查一下 2026 年国内主流大模型的上下文长度和定价，做成表格。</p>
+        <p>每条都要给出来源链接，注明查到的日期。</p>
+        <p>查不到的直接写『未找到』，不要推测。」</p>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="box bad-side">
+        <h4>例子三 · 排错</h4>
+        <p>「报错了，怎么办？」</p>
+        <p class="faint">没有报错原文、没有环境、没有复现步骤，只能靠猜。</p>
+      </div>
+      <div class="box good-side">
+        <h4>例子三 · 排错</h4>
+        <p>「运行 <code>npm run build</code> 报错，完整报错是：（粘贴原文）</p>
+        <p>先分析原因，列出可能的几种，再挑最可能的一个去验证。</p>
+        <p>确认原因之前不要改代码。」</p>
+      </div>
+    </div>
+
+    <h3>在 dsh 里特别有用的六个技巧</h3>
+    <ol>
+      <li>
+        <strong>用 <code>@</code> 引用文件，别靠嘴描述。</strong>
+        在输入框里用 <code>@</code> 选中工作区里的文件或目录，它就能精确读到你指的东西，
+        比「那个配置文件」这种说法靠谱得多。
+      </li>
+      <li>
+        <strong>让它「先读后改」。</strong>
+        说一句「先读完相关文件，复述你的理解和修改计划，等我确认再动手」，
+        能挡掉大量返工。
+      </li>
+      <li>
+        <strong>要证据，不要结论。</strong>
+        要求它贴出实际执行的命令和原始输出。说「我改了」和「这是命令输出」，可信度完全不同。
+      </li>
+      <li>
+        <strong>明确禁止项。</strong>
+        「不要动 <code>docs/</code>」「不要升级依赖版本」「不要删除任何文件」——
+        写出禁止项比写一百句鼓励有用。
+      </li>
+      <li>
+        <strong>给验收标准。</strong>
+        「测试全绿才算完成」「表格里每个数字都要有出处」，它就知道什么时候该停。
+      </li>
+      <li>
+        <strong>复杂任务让它先列计划。</strong>
+        多步骤的活先要一份计划，你审一遍再放行，比中途发现方向错了要省太多。
+      </li>
+    </ol>
+
+    <h3>迭代三招</h3>
+    <ul>
+      <li><strong>指出具体错误，别只说「不对」。</strong>「第三行的公式用错了列，应该是 D 列不是 C 列」远好于「结果不对」。</li>
+      <li><strong>一次改一个变量。</strong>同时提五条修改意见，你很难判断是哪一条起了作用。</li>
+      <li><strong>让它复述需求。</strong>大任务开始前说「先用三句话复述你要做什么，我确认后你再动手」，能提前暴露误解。</li>
+    </ul>
+
+    <!-- ================= 07 ================= -->
+    <h2 id="templates">07 · 提示词模板（可直接复制）</h2>
+    <p class="muted">把方括号里的内容换成你自己的，其余照抄即可。</p>
+
+    <h3>1. 改代码</h3>
+    <div class="code-block">
+      <pre><code>任务：修改 [文件路径]，让它 [期望效果]。
+
+范围：只改这个文件（及相关测试），不要动 [不要动的目录]。
+约束：保持现有函数签名兼容；不升级依赖；不引入新库。
+验收：跑 `[验证命令]` 通过，并把原始输出贴给我。
+
+先复述你的理解和改动计划，我确认后再动手。</code></pre>
+    </div>
+
+    <h3>2. 排查报错</h3>
+    <div class="code-block">
+      <pre><code>执行 [命令] 时报错，完整报错如下：
+[粘贴原始报错]
+
+请先分析原因，列出 2–3 种可能性并说明依据；
+再挑最可能的一种去验证。
+确认原因之前不要改任何代码。</code></pre>
+    </div>
+
+    <h3>3. 代码审查</h3>
+    <div class="code-block">
+      <pre><code>审查 [文件/目录]，重点关注：
+1. 明显的逻辑错误与边界情况
+2. 安全隐患（密钥硬编码、命令注入、路径穿越）
+3. 与项目现有风格不一致的地方
+
+只报告确认的问题，每条给出：文件、行号、问题、建议改法。
+不确定的标注为「待确认」，不要编造。不要直接改代码。</code></pre>
+    </div>
+
+    <h3>4. 资料调研</h3>
+    <div class="code-block">
+      <pre><code>调研主题：[主题]。
+时间范围：[例如 2026 年至今]。
+产出：一份中文摘要 + 一张对比表，包含 [字段1]、[字段2]、[字段3]。
+
+要求：每条结论后面附来源链接；查不到就写「未找到」，不要推测。
+最后单独列一节「存在争议或不确定的部分」。</code></pre>
+    </div>
+
+    <h3>5. 写文档 / 总结</h3>
+    <div class="code-block">
+      <pre><code>把 [文件/目录] 整理成一份面向 [读者：新手/同事/领导] 的说明文档。
+要求：
+- 先说结论，再说细节
+- 术语第一次出现时用一句话解释
+- 用二级标题分节，每节不超过 400 字
+- 不写废话，不写「总而言之」这类过场话
+
+输出 Markdown，保存到 [路径]。</code></pre>
+    </div>
+
+    <h3>6. 整理表格 / 文件</h3>
+    <div class="code-block">
+      <pre><code>读取 [文件]，把内容整理成表格，列为：[列1]、[列2]、[列3]。
+规则：
+- 缺失值统一填「—」，不要猜
+- 日期统一成 YYYY-MM-DD
+- 不要合并单元格
+
+先给我前 5 行看看格式对不对，确认后再处理全部。</code></pre>
+    </div>
+
+    <h3>7. 让它先反问你</h3>
+    <div class="code-block">
+      <pre><code>我要做的是：[粗糙地描述你的需求]。
+
+在开始之前，请先问我 3–5 个你认为最关键的问题，
+把需求里不清楚的地方问清楚，然后再动手。</code></pre>
+    </div>
+
+    <h3>8. 长任务拆解</h3>
+    <div class="code-block">
+      <pre><code>目标：[一句话目标]
+
+请先给出分步计划，每步写清楚：要做什么、产出是什么、怎么验证。
+计划里标注哪些步骤需要我确认。
+我确认计划后，按步骤执行，每完成一步向我汇报一次。</code></pre>
+    </div>
+
+    <!-- ================= 08 ================= -->
+    <h2 id="lingo">08 · AI 常用语速查</h2>
+    <p class="muted">在输入框里输入关键词即可筛选，比如输入「缓存」或「cache」。</p>
+    <input class="filter" id="glossaryFilter" type="search" placeholder="筛选术语…（支持中英文）" autocomplete="off">
+    <div class="table-wrap">
+      <table id="glossary">
+        <thead>
+          <tr><th>中文</th><th>英文</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>智能体</td><td>Agent</td><td>能规划、调用工具并自主推进任务的模型</td></tr>
+          <tr><td>框架 / 基座</td><td>Harness</td><td>给模型提供工具、权限与界面的外壳</td></tr>
+          <tr><td>大语言模型</td><td>LLM</td><td>Large Language Model，用海量文本训练出的语言模型</td></tr>
+          <tr><td>词元</td><td>Token</td><td>模型处理与计费的最小文字单位</td></tr>
+          <tr><td>上下文</td><td>Context</td><td>本次请求模型能看到的全部内容</td></tr>
+          <tr><td>上下文窗口</td><td>Context Window</td><td>上下文的容量上限</td></tr>
+          <tr><td>系统提示词</td><td>System Prompt</td><td>排在最前面的固定身份与规则说明</td></tr>
+          <tr><td>提示词</td><td>Prompt</td><td>你发给模型的指令内容</td></tr>
+          <tr><td>提示词工程</td><td>Prompt Engineering</td><td>设计提示词以获得更好结果的实践</td></tr>
+          <tr><td>少样本示例</td><td>Few-shot</td><td>在提示里给几个例子，让模型照着做</td></tr>
+          <tr><td>工具调用</td><td>Tool Call</td><td>模型请求程序执行某个能力，再拿回结果</td></tr>
+          <tr><td>函数调用</td><td>Function Calling</td><td>工具调用的早期叫法，含义相近</td></tr>
+          <tr><td>检索增强生成</td><td>RAG</td><td>先检索资料再让模型回答，减少幻觉</td></tr>
+          <tr><td>模型上下文协议</td><td>MCP</td><td>让模型接入外部工具与数据源的通用协议</td></tr>
+          <tr><td>智能体框架</td><td>Agent Harness / Framework</td><td>承载智能体运行的程序，dsh 就是其中之一</td></tr>
+          <tr><td>子代理</td><td>Subagent</td><td>由主代理派出的独立小任务代理</td></tr>
+          <tr><td>缓存命中</td><td>Cache Hit</td><td>输入前缀与历史请求重复，可复用缓存的部分</td></tr>
+          <tr><td>缓存未命中</td><td>Cache Miss</td><td>需要重新计算的部分，单价更高</td></tr>
+          <tr><td>上下文压缩</td><td>Compaction</td><td>把过长的历史总结压缩，腾出窗口空间</td></tr>
+          <tr><td>推理强度</td><td>Reasoning Effort</td><td>模型思考深度的档位</td></tr>
+          <tr><td>思维链</td><td>Chain of Thought</td><td>模型在给答案前先展开推理过程</td></tr>
+          <tr><td>温度</td><td>Temperature</td><td>控制输出随机性的参数</td></tr>
+          <tr><td>采样</td><td>Sampling</td><td>模型逐步挑选下一个 token 的过程</td></tr>
+          <tr><td>幻觉</td><td>Hallucination</td><td>模型生成看似合理但实际错误的内容</td></tr>
+          <tr><td>越狱</td><td>Jailbreak</td><td>试图绕过模型安全限制的提示手法</td></tr>
+          <tr><td>提示注入</td><td>Prompt Injection</td><td>把恶意指令藏在资料里，诱导模型执行</td></tr>
+          <tr><td>沙箱</td><td>Sandbox</td><td>限制程序活动范围的安全围栏</td></tr>
+          <tr><td>审批</td><td>Approval</td><td>敏感操作前征求用户同意的流程</td></tr>
+          <tr><td>工作区</td><td>Workspace</td><td>允许读写文件的目录范围</td></tr>
+          <tr><td>会话</td><td>Session</td><td>一次有记忆、可恢复的连续对话</td></tr>
+          <tr><td>插件</td><td>Plugin</td><td>可增删组合的功能模块</td></tr>
+          <tr><td>技能</td><td>Skill</td><td>按需加载的专业操作手册</td></tr>
+          <tr><td>上下文溢出</td><td>Context Overflow</td><td>内容超出窗口上限，必须压缩或截断</td></tr>
+          <tr><td>限流</td><td>Rate Limit</td><td>服务商对请求频率或并发量的限制</td></tr>
+          <tr><td>延迟</td><td>Latency</td><td>从发出请求到开始收到回复的时间</td></tr>
+          <tr><td>每秒生成词元数</td><td>TPS</td><td>Tokens Per Second，输出速度指标</td></tr>
+          <tr><td>首字延迟</td><td>TTFT</td><td>Time To First Token，第一个字出现的耗时</td></tr>
+          <tr><td>微调</td><td>Fine-tuning</td><td>用专有数据继续训练模型，改变其行为</td></tr>
+          <tr><td>量化</td><td>Quantization</td><td>压缩模型精度以降低显存占用</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="empty-hint" id="glossaryEmpty">没有匹配的术语，换个关键词试试。</p>
+
+    <!-- ================= 09 ================= -->
+    <h2 id="faq">09 · 常见问题</h2>
+
+    <h3>它为什么不动手，一直问我？</h3>
+    <p>
+      通常是两种情况：一是当前权限策略要求敏感操作必须审批，它在等你点头；
+      二是你的指令本身有歧义，它在确认方向。
+      想少被打断，就在指令里把范围和验收讲清楚；权限策略本身也可以调整（在设置或配置层），
+      但要清楚：放宽意味着风险更大。
+    </p>
+
+    <h3>它说改了，但我看文件没变化？</h3>
+    <p>
+      常见原因有三个：一是改动被沙箱拦下了（会报权限错误，不是静默失败，注意看输出）；
+      二是它只给了方案还没执行；三是改到了别的工作区或别的路径。
+      最有效的办法是让它<strong>贴出实际命令和原始输出</strong>，或者让它重新读一遍那个文件确认内容。
+    </p>
+
+    <h3>会话越聊越慢、越聊越贵，正常吗？</h3>
+    <p>
+      正常。每一轮都要把历史上下文重新送进模型，历史越长，输入 token 越多。
+      好消息是历史部分通常能命中缓存，单价低很多。
+      如果确实太长了，可以开个新会话，把关键结论复制过去；或者让它把当前进展总结成一份文件再继续。
+    </p>
+
+    <h3>为什么同一个任务，两次给的答案不一样？</h3>
+    <p>
+      模型输出带有随机性，缓存只复用输入，不固定输出，所以这属于正常现象。
+      想要更稳定的结果，可以让它把结论写进文件，后续都基于文件工作，而不是靠对话记忆。
+    </p>
+
+    <h3>它能联网吗？</h3>
+    <p>
+      可以，前提是当前会话给它装了联网相关的工具（网页搜索、网页抓取）。
+      另外要注意：联网拿回来的内容是<strong>外部数据</strong>，里面可能藏着试图操纵它的指令
+      （这叫提示注入）。正规的框架会把这类内容当资料处理，而不是当命令执行。
+    </p>
+
+    <h3>我该信任它的输出吗？</h3>
+    <p>
+      把它当成一个效率很高、但需要抽查的同事。凡是涉及事实、数字、代码正确性的部分，
+      都值得看一眼来源或自己验证一遍。它的强项是执行和整理，不是替你做最终判断。
+    </p>
+
+    <h3>深色模式和浅色模式哪个省 token？</h3>
+    <p>
+      都不省。界面的颜色和模型计费没有任何关系——之所以把这个问题写在这里，
+      是因为它确实经常被人认真地问。
+    </p>
+
+    <h3>怎么看懂网上的教学视频？</h3>
+    <p>
+      视频适合建立直觉，但更新往往滞后，容易把旧界面、旧模型名当成本次版本的事实。
+      建议的用法是：用视频理解概念，用官方文档核对细节。
+      搜索时可以用「DeepSeek Harness 入门」「dsh 插件」「prompt caching 缓存命中」这类关键词。
+    </p>
+
+    <!-- ================= 10 ================= -->
+    <h2 id="safety">10 · 安全与好习惯</h2>
+
+    <h3>给它定规矩：AGENTS.md</h3>
+    <p>
+      dsh 支持把长期有效的规则写进指令文件（例如用户目录下的 <code>~/.dsh/AGENTS.md</code>），
+      每次开始新会话时会自动加载。你可以在这里写清楚：
+    </p>
+    <ul>
+      <li><strong>禁止项</strong>：比如「不要删除任何文件」「不要修改注册表」「不要强制结束某进程」。</li>
+      <li><strong>需要先问的事</strong>：比如「覆盖已有文件前必须先问我」。</li>
+      <li><strong>做事方式</strong>：比如「每步都贴出实际命令和原始输出」「出错先贴原文给我看」。</li>
+    </ul>
+    <p class="muted">
+      写规则的原则是：<strong>宁可具体，不要抽象</strong>。
+      「小心一点」没有用，「删除文件前必须问我」才有用。
+    </p>
+
+    <h3>权限：够用就好</h3>
+    <ul>
+      <li>文件权限从「只读」开始，确认可靠后再逐步放宽。</li>
+      <li>重要目录（系统盘、程序安装目录）尽量排除在工作区之外。</li>
+      <li>定期看一眼它到底改了哪些文件，尤其是批量的改动。</li>
+    </ul>
+
+    <h3>密钥与隐私</h3>
+    <ul>
+      <li>API Key 只填在设置里，<strong>不要贴进聊天内容</strong>，也不要在截图里露出来。</li>
+      <li>不要让它把密钥写进代码或配置文件；如果不小心写了，立刻去平台重置密钥。</li>
+      <li>敏感数据要么脱敏，要么改成让它处理本地文件而不上传内容。</li>
+    </ul>
+
+    <h3>动手前的三个习惯</h3>
+    <ol>
+      <li><strong>先备份。</strong>尤其是批量改名、批量格式化这类不可逆操作。</li>
+      <li><strong>先只读。</strong>让它先分析、给方案，你确认了再执行。</li>
+      <li><strong>要证据。</strong>命令输出、测试结果、文件 diff，比任何口头保证都可靠。</li>
+    </ol>
+
+    <!-- ================= 11 ================= -->
+    <h2 id="refs">11 · 参考资料</h2>
+    <ul>
+      <li><a href="https://deepseek-harness.github.io/deepseek-harness/" target="_blank" rel="noopener">DeepSeek Harness 官方文档</a>——本项目最权威的说明</li>
+      <li><a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener">deepseek-ai/deepseek-harness</a>——开源仓库与 Discussions</li>
+      <li><a href="https://api-docs.deepseek.com/zh-cn/guides/kv_cache" target="_blank" rel="noopener">上下文硬盘缓存</a>——缓存命中规则的官方原文</li>
+      <li><a href="https://api-docs.deepseek.com/zh-cn/quick_start/pricing" target="_blank" rel="noopener">模型 &amp; 价格</a>——各模型的实时定价</li>
+      <li><a href="https://api-docs.deepseek.com/zh-cn/quick_start/token_usage" target="_blank" rel="noopener">Token 用量计算</a>——换算比例与离线估算工具</li>
+      <li><a href="https://platform.deepseek.com/" target="_blank" rel="noopener">DeepSeek 开放平台</a>——申请 API Key 与查看账单</li>
+    </ul>
+
+    <footer>
+      <p>本指南由 DSH 会话生成于 2026-09-16，内容依据官方文档与官方 API 文档核对整理。</p>
+      <p>DeepSeek Harness 处于开发者预览阶段，版本迭代较快，具体功能与价格请以官方页面为准。</p>
+    </footer>
+  </main>
+</div>
+
+<button class="to-top" id="toTop" type="button" title="回到顶部">↑</button>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- 复制按钮 ---------- */
+  document.querySelectorAll('.code-block').forEach(function (block) {
+    var btn = document.createElement('button');
+    btn.className = 'copy';
+    btn.type = 'button';
+    btn.textContent = '复制';
+    btn.addEventListener('click', function () {
+      var code = block.querySelector('code');
+      if (!code) return;
+      var text = code.innerText;
+      var done = function () {
+        btn.textContent = '已复制';
+        setTimeout(function () { btn.textContent = '复制'; }, 1400);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text, done); });
+      } else {
+        fallback(text, done);
+      }
+    });
+    block.appendChild(btn);
+  });
+
+  function fallback(text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { /* 忽略 */ }
+    document.body.removeChild(ta);
+  }
+
+  /* ---------- 术语筛选 ---------- */
+  var filter = document.getElementById('glossaryFilter');
+  var table = document.getElementById('glossary');
+  if (filter && table) {
+    var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+    var empty = document.getElementById('glossaryEmpty');
+    filter.addEventListener('input', function () {
+      var q = filter.value.trim().toLowerCase();
+      var visible = 0;
+      rows.forEach(function (row) {
+        var hit = !q || row.innerText.toLowerCase().indexOf(q) !== -1;
+        row.style.display = hit ? '' : 'none';
+        if (hit) visible++;
+      });
+      if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
+    });
+  }
+
+  /* ---------- 目录高亮 ---------- */
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var sections = links
+    .map(function (a) { return document.querySelector(a.getAttribute('href')); })
+    .filter(Boolean);
+
+  function syncActive() {
+    var pos = window.scrollY + 120;
+    var current = sections[0];
+    sections.forEach(function (sec) {
+      if (sec.offsetTop <= pos) current = sec;
+    });
+    links.forEach(function (a) {
+      a.classList.toggle('active', current && a.getAttribute('href') === '#' + current.id);
+    });
+  }
+
+  /* ---------- 回到顶部 ---------- */
+  var toTop = document.getElementById('toTop');
+  toTop.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () {
+      syncActive();
+      toTop.classList.toggle('show', window.scrollY > 600);
+      ticking = false;
+    });
+  }, { passive: true });
+
+  syncActive();
+
+  /* ---------- 手机端目录开关 ---------- */
+  var menuBtn = document.getElementById('menuBtn');
+  var sidebar = document.getElementById('sidebar');
+
+  function closeMenu() {
+    if (!menuBtn || !sidebar) return;
+    sidebar.classList.remove('open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.textContent = '目录 ▾';
+  }
+
+  if (menuBtn && sidebar) {
+    menuBtn.addEventListener('click', function () {
+      var open = sidebar.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menuBtn.textContent = open ? '收起目录 ▴' : '目录 ▾';
+    });
+    sidebar.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') closeMenu();
+    });
+  }
+
+  /* ---------- 主题切换 ---------- */
+  var btn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    btn.textContent = theme === 'dark' ? '切换浅色' : '切换深色';
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem('dsh-guide-theme'); } catch (e) { /* 忽略 */ }
+  if (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    saved = 'dark';
+  }
+  applyTheme(saved === 'dark' ? 'dark' : 'light');
+
+  btn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('dsh-guide-theme', next); } catch (e) { /* 忽略 */ }
+  });
+})();
+</script>
+</body>
+</html>
