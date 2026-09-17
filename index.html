@@ -438,142 +438,59 @@
         到 <a href="https://nodejs.org/" target="_blank" rel="noopener">nodejs.org</a> 下载 LTS 版本，一路「下一步」即可。
         <p class="muted">安装时可以顺手改路径：视频里建议把安装目录从 C 盘改到 D 盘，别把系统盘塞满。
         装完在命令行输入 <code>node -v</code>，能显示版本号就算成功。</p>
-
-        <figure class="figure">
-          <svg viewBox="0 0 720 260" role="img" aria-label="Node.js 官网下载页示意图">
-            <rect class="svg-win" x="1" y="1" width="718" height="258" rx="12"/>
-            <line x1="1" y1="44" x2="719" y2="44" stroke="var(--line)" stroke-width="1.5"/>
-            <circle class="svg-dot" cx="24" cy="23" r="5"/>
-            <circle class="svg-dot" cx="42" cy="23" r="5"/>
-            <circle class="svg-dot" cx="60" cy="23" r="5"/>
-            <rect x="84" y="12" width="268" height="22" rx="11" fill="var(--bg)" stroke="var(--line)"/>
-            <text class="svg-mono svg-dim" x="96" y="27" font-size="12">nodejs.org/zh-cn</text>
-            <text class="svg-sans svg-txt" x="40" y="102" font-size="27" font-weight="700">Node.js®</text>
-            <text class="svg-sans svg-dim" x="40" y="130" font-size="14">随时随地将 JavaScript 用于服务器</text>
-            <rect x="40" y="152" width="202" height="44" rx="8" fill="var(--accent)"/>
-            <text class="svg-sans" x="141" y="179" font-size="14" font-weight="600" fill="#ffffff" text-anchor="middle">下载 Node.js (LTS)</text>
-            <text class="svg-sans svg-accent" x="274" y="170" font-size="14.5" font-weight="600">← 点这个按钮</text>
-            <text class="svg-sans svg-faint" x="274" y="193" font-size="12.5">一路「下一步」，可以顺手把路径改到 D 盘</text>
-            <text class="svg-sans svg-faint" x="40" y="232" font-size="13">装完在黑框里执行 node -v，能显示版本号就说明成功了</text>
-          </svg>
-          <figcaption><b>图 1</b>　Node.js 官网下载页（示意图）</figcaption>
-        </figure>
       </li>
       <li>
         <strong>打开命令行</strong>
         按 <kbd>Win</kbd> + <kbd>R</kbd>，输入 <code>cmd</code> 回车，会弹出一个黑色窗口。
         <p class="muted">接下来的命令都在这个黑框里执行。<strong>这个黑框不能关</strong>——关掉它，dsh 就停了。</p>
-
-        <figure class="figure">
-          <svg viewBox="0 0 720 210" role="img" aria-label="在命令行验证环境示意图">
-            <rect class="svg-win" x="1" y="1" width="718" height="208" rx="12"/>
-            <line x1="1" y1="42" x2="719" y2="42" stroke="var(--line)" stroke-width="1.5"/>
-            <circle class="svg-dot" cx="24" cy="22" r="5"/>
-            <circle class="svg-dot" cx="42" cy="22" r="5"/>
-            <circle class="svg-dot" cx="60" cy="22" r="5"/>
-            <text class="svg-sans svg-faint" x="360" y="27" font-size="12.5" text-anchor="middle">命令提示符</text>
-            <text class="svg-mono svg-txt" x="28" y="78" font-size="14">C:\Users\你&gt; node -v</text>
-            <text class="svg-mono svg-ok"  x="28" y="102" font-size="14">v22.22.3</text>
-            <text class="svg-mono svg-txt" x="28" y="134" font-size="14">C:\Users\你&gt; npm -v</text>
-            <text class="svg-mono svg-ok"  x="28" y="158" font-size="14">10.9.8</text>
-            <text class="svg-sans svg-faint" x="28" y="190" font-size="12.5">两个命令都能显示版本号，说明 Node.js 和 npm 都装好了</text>
-          </svg>
-          <figcaption><b>图 2</b>　在命令行里验证环境（示意图）</figcaption>
-        </figure>
       </li>
       <li>
-        <strong>安装 dsh 本体</strong>
+        <strong>装好并启动</strong>
         <div class="code-block">
-          <pre><code>npm install -g @deepseek-ai/dsh --verbose</code></pre>
+          <pre><code>npx --verbose @deepseek-ai/dsh web</code></pre>
         </div>
         <p class="muted">
-          末尾的 <code>--verbose</code> 是视频作者特意加的：它会不停打印下载日志，
-          不然安装过程中界面看起来像卡死，容易误以为没反应。全程需要联网，网络慢就多等几分钟。
+          <code>npx</code> 会自动把 dsh 下载下来并直接以网页模式启动，所以这一条命令<strong>既是安装也是启动</strong>，
+          不用分成两步。第一次运行需要联网下载依赖，网络慢就多等几分钟。
         </p>
+        <div class="card note">
+          <p><strong>为什么要加 <code>--verbose</code>？</strong></p>
+          <p>
+            这是视频作者特意加的，他本人的原话是：<strong>「加 <code>--verbose</code> 可以让小白看到代码在跑，提供情绪价值。」</strong>
+          </p>
+          <p>
+            说人话就是：第一次运行要下载一大堆依赖包，<strong>不加这个参数，终端会长时间一片空白，看起来像卡死了</strong>，
+            新手很容易误以为没反应，于是反复按键甚至强行关窗口。加上之后下载日志会不停滚动，
+            你能清楚看到「它在干活、下到哪一步了」。它<strong>只影响日志的啰嗦程度，不影响安装结果</strong>，去掉也能正常装。
+          </p>
+        </div>
         <div class="card note warn">
-          <p><strong>如果进度条一直不动、或者慢到无法接受：</strong>换成国内镜像源再执行一次（视频里给的补救办法）：</p>
+          <p><strong>如果一直不动、或者慢到无法接受：</strong>换成国内镜像源再执行一次（视频里给的补救办法）：</p>
           <div class="code-block">
-            <pre><code>npm install -g --registry=https://registry.npmmirror.com @deepseek-ai/dsh --verbose</code></pre>
+            <pre><code>npx --verbose --registry=https://registry.npmmirror.com @deepseek-ai/dsh web</code></pre>
           </div>
         </div>
-
-        <figure class="figure">
-          <svg viewBox="0 0 720 236" role="img" aria-label="安装 dsh 本体示意图">
-            <rect class="svg-win" x="1" y="1" width="718" height="234" rx="12"/>
-            <line x1="1" y1="42" x2="719" y2="42" stroke="var(--line)" stroke-width="1.5"/>
-            <circle class="svg-dot" cx="24" cy="22" r="5"/>
-            <circle class="svg-dot" cx="42" cy="22" r="5"/>
-            <circle class="svg-dot" cx="60" cy="22" r="5"/>
-            <text class="svg-sans svg-faint" x="360" y="27" font-size="12.5" text-anchor="middle">命令提示符</text>
-            <text class="svg-mono svg-txt" x="28" y="76" font-size="13.5">C:\Users\你&gt; npm install -g @deepseek-ai/dsh --verbose</text>
-            <text class="svg-mono svg-faint" x="28" y="102" font-size="12.5">npm http fetch GET 200 https://registry.npmjs.org/@deepseek-ai/dsh</text>
-            <text class="svg-mono svg-faint" x="28" y="124" font-size="12.5">npm http fetch GET 200 https://registry.npmjs.org/commander</text>
-            <text class="svg-mono svg-faint" x="28" y="146" font-size="12.5">npm http fetch GET 200 https://registry.npmjs.org/zod</text>
-            <text class="svg-mono svg-faint" x="28" y="168" font-size="12.5">……（这些日志就是在下载，别以为卡死了）</text>
-            <text class="svg-mono svg-ok"    x="28" y="196" font-size="13.5">added 137 packages in 42s</text>
-            <text class="svg-sans svg-faint" x="28" y="220" font-size="12.5">出现 added … packages 就说明装好了</text>
-          </svg>
-          <figcaption><b>图 3</b>　安装 dsh 本体（示意图；命令依据视频整理，日志内容为示例）</figcaption>
-        </figure>
       </li>
       <li>
-        <strong>启动</strong>
+        <strong>以后怎么再打开</strong>
+        再执行一次同样的命令就行；依赖已经缓存到本地，第二次启动会快很多。
         <div class="code-block">
-          <pre><code>dsh web</code></pre>
+          <pre><code>npx --verbose @deepseek-ai/dsh web</code></pre>
         </div>
         <p class="muted">
-          注意 <code>dsh</code> 和 <code>web</code> 中间<strong>有一个空格</strong>。
-          启动成功后浏览器会自动打开，地址是 <code>http://127.0.0.1:3080</code>；
-          如果没自动弹出来，手动在浏览器里输入这个地址即可。
+          注意 <code>dsh</code> 和 <code>web</code> 中间有<strong>一个空格</strong>。
+          启动成功后浏览器会自动打开，地址是 <code>http://127.0.0.1:3080</code>；如果没自动弹出来，手动在浏览器里输入这个地址即可。
         </p>
-
-        <figure class="figure">
-          <svg viewBox="0 0 720 200" role="img" aria-label="启动 dsh web 示意图">
-            <rect class="svg-win" x="1" y="1" width="718" height="198" rx="12"/>
-            <line x1="1" y1="42" x2="719" y2="42" stroke="var(--line)" stroke-width="1.5"/>
-            <circle class="svg-dot" cx="24" cy="22" r="5"/>
-            <circle class="svg-dot" cx="42" cy="22" r="5"/>
-            <circle class="svg-dot" cx="60" cy="22" r="5"/>
-            <text class="svg-sans svg-faint" x="360" y="27" font-size="12.5" text-anchor="middle">命令提示符</text>
-            <text class="svg-mono svg-txt" x="28" y="78" font-size="14">C:\Users\你&gt; dsh web</text>
-            <text class="svg-mono svg-ok"  x="28" y="106" font-size="13.5">本机打开： http://127.0.0.1:3080/</text>
-            <text class="svg-mono svg-faint" x="28" y="132" font-size="12.5">已自动为你打开浏览器</text>
-            <rect x="28" y="150" width="664" height="32" rx="7" fill="var(--warn-bg)" stroke="var(--warn-line)"/>
-            <text class="svg-sans svg-warn" x="44" y="171" font-size="13" font-weight="600">⚠ 这个黑框要一直开着——关掉它，网页就打不开了</text>
-          </svg>
-          <figcaption><b>图 4</b>　启动成功的样子（示意图）</figcaption>
-        </figure>
+        <p class="muted">
+          <strong>运行期间这个终端窗口不能关</strong>——关掉它，网页就打不开了。
+          嫌每次敲命令麻烦，可以照下面做一个桌面快捷方式。
+        </p>
       </li>
       <li>
         <strong>填模型密钥（申请 API Key）</strong>
         第一次启动时，界面会<strong>直接弹出一个让你填密钥的对话框</strong>；也可以之后从<strong>设置 → 模型</strong>进去填。
         密钥在 <a href="https://platform.deepseek.com/" target="_blank" rel="noopener">platform.deepseek.com</a> 申请。
         <p class="muted">保存后模型路由立刻可用，不需要重启服务。</p>
-
-        <figure class="figure">
-          <svg viewBox="0 0 720 300" role="img" aria-label="API Key 配置对话框示意图">
-            <rect class="svg-win" x="1" y="1" width="718" height="298" rx="12"/>
-            <line x1="1" y1="44" x2="719" y2="44" stroke="var(--line)" stroke-width="1.5"/>
-            <circle class="svg-dot" cx="24" cy="23" r="5"/>
-            <circle class="svg-dot" cx="42" cy="23" r="5"/>
-            <circle class="svg-dot" cx="60" cy="23" r="5"/>
-            <rect x="200" y="12" width="320" height="22" rx="11" fill="var(--bg)" stroke="var(--line)"/>
-            <text class="svg-mono svg-dim" x="360" y="27" font-size="12" text-anchor="middle">127.0.0.1:3080</text>
-
-            <rect x="152" y="74" width="416" height="180" rx="12" fill="var(--bg)" stroke="var(--line)" stroke-width="1.5"/>
-            <text class="svg-sans svg-txt" x="180" y="112" font-size="16" font-weight="700">Add an API key to get started</text>
-            <text class="svg-sans svg-dim" x="180" y="138" font-size="13">Configure the official DeepSeek provider to start</text>
-            <text class="svg-sans svg-dim" x="180" y="158" font-size="13">building.</text>
-            <rect x="180" y="176" width="286" height="36" rx="7" fill="var(--bg-soft)" stroke="var(--line)"/>
-            <text class="svg-mono svg-faint" x="194" y="199" font-size="13">sk-··························</text>
-            <rect x="478" y="176" width="62" height="36" rx="7" fill="var(--accent)"/>
-            <text class="svg-sans" x="509" y="199" font-size="13.5" font-weight="600" fill="#ffffff" text-anchor="middle">Save</text>
-            <text class="svg-sans svg-faint" x="180" y="236" font-size="12">密钥在 platform.deepseek.com 申请</text>
-
-            <text class="svg-sans svg-dim" x="360" y="284" font-size="13" text-anchor="middle">第一次启动就会看到这个框，把 Key 粘进去点 Save 即可</text>
-          </svg>
-          <figcaption><b>图 5</b>　启动后弹出的 API Key 配置框（依据视频第 161 秒的真实画面重绘）</figcaption>
-        </figure>
       </li>
       <li>
         <strong>选择工作区</strong>
@@ -600,37 +517,10 @@
     <p>每次都开黑框敲命令太麻烦。视频最后一段给了个很实用的做法：</p>
     <ol>
       <li>桌面右键 → <strong>新建 → 文本文档</strong>。</li>
-      <li>打开它，把 <code>dsh web</code> 这一行粘进去，保存并关闭。</li>
+      <li>打开它，把 <code>npx --verbose @deepseek-ai/dsh web</code> 这一行粘进去，保存并关闭。</li>
       <li>把文件名后缀从 <code>.txt</code> 改成 <code>.bat</code>（需要先在文件资源管理器里打开「查看 → 显示 → 文件扩展名」才改得动）。</li>
       <li>双击这个 <code>.bat</code>，dsh 就启动了。</li>
     </ol>
-
-    <figure class="figure">
-      <svg viewBox="0 0 720 174" role="img" aria-label="制作桌面快捷方式三步示意图">
-        <text class="svg-sans svg-dim" x="112" y="22" font-size="13" font-weight="600" text-anchor="middle">① 新建文本文档</text>
-        <rect class="svg-win" x="14" y="34" width="196" height="76" rx="10"/>
-        <text class="svg-mono svg-txt" x="112" y="70" font-size="12.5" text-anchor="middle">新建文本文档.txt</text>
-        <text class="svg-sans svg-faint" x="112" y="92" font-size="11.5" text-anchor="middle">桌面右键 → 新建 → 文本文档</text>
-
-        <text class="svg-accent" x="228" y="80" font-size="20">→</text>
-
-        <text class="svg-sans svg-dim" x="374" y="22" font-size="13" font-weight="600" text-anchor="middle">② 写入启动命令</text>
-        <rect class="svg-win" x="276" y="34" width="196" height="76" rx="10"/>
-        <text class="svg-mono svg-txt" x="374" y="70" font-size="13" text-anchor="middle">dsh web</text>
-        <text class="svg-sans svg-faint" x="374" y="92" font-size="11.5" text-anchor="middle">打开文件，粘进去，保存关闭</text>
-
-        <text class="svg-accent" x="490" y="80" font-size="20">→</text>
-
-        <text class="svg-sans svg-dim" x="618" y="22" font-size="13" font-weight="600" text-anchor="middle">③ 后缀改成 .bat</text>
-        <rect class="svg-win" x="528" y="34" width="180" height="76" rx="10"/>
-        <text class="svg-mono svg-accent" x="618" y="70" font-size="13" text-anchor="middle">dsh.bat</text>
-        <text class="svg-sans svg-faint" x="618" y="92" font-size="11.5" text-anchor="middle">以后双击它就能启动</text>
-
-        <text class="svg-sans svg-faint" x="360" y="140" font-size="12.5" text-anchor="middle">看不到 .txt 后缀？先在资源管理器里打开「查看 → 显示 → 文件扩展名」</text>
-        <text class="svg-sans svg-warn" x="360" y="162" font-size="12.5" font-weight="600" text-anchor="middle">双击没反应？先把还开着的黑框关掉，再双击</text>
-      </svg>
-      <figcaption><b>图 6</b>　做一个「双击就启动」的快捷方式（示意图）</figcaption>
-    </figure>
     <div class="card note warn">
       <p><strong>两个常见坑：</strong></p>
       <ul>
@@ -640,10 +530,18 @@
     </div>
 
     <div class="card note">
-      <p><strong>另一种安装方式（免安装）：</strong>官方 README 给的是
-      <code>npx @deepseek-ai/dsh web</code>——不装进电脑、每次临时下载运行，
-      适合只想试一次的人；缺点是每次启动都要重新下载，比较慢。
-      打算长期用，还是推荐上面这种全局安装。</p>
+      <p><strong>另一种方式：全局安装（可选）</strong></p>
+      <p>
+        上面的 <code>npx</code> 方式是「用一次下一次」，不会在系统里留下 <code>dsh</code> 命令。
+        如果你打算长期用、也不想每次都敲一长串，可以先把它装到全局：
+      </p>
+      <div class="code-block">
+        <pre><code>npm install -g @deepseek-ai/dsh</code></pre>
+      </div>
+      <p class="muted">
+        装完之后，以后直接敲 <code>dsh web</code> 就能启动（<code>dsh</code> 和 <code>web</code> 中间有空格）。
+        两种方式用的是同一份配置和会话数据，可以随时换着用。
+      </p>
     </div>
 
     <div class="card note warn">
@@ -653,6 +551,23 @@
         <li>不确定的活，就告诉它「先只读不改」，看它分析得对不对再放行。</li>
         <li>API Key 是花钱的钥匙，不要贴进聊天内容里，也不要提交到代码仓库。</li>
       </ul>
+    </div>
+
+    <div class="card note">
+      <p><strong>想看完整的详细步骤？直接看视频</strong></p>
+      <p>
+        上面这一节就是按下面这个视频整理的。文字的好处是方便查命令、对着抄；
+        而视频里有<strong>完整的录屏操作</strong>——鼠标点哪里、窗口长什么样、每一步大概等多久，
+        第一次装的时候对照着走一遍会踏实很多。
+      </p>
+      <p>
+        <a href="https://www.bilibili.com/video/BV1f4gP6iEYK/" target="_blank" rel="noopener">【手把手安装 deepseek-harness】</a>
+        ——B 站，UP 主「乘黑鲸渡红海」，时长约 6 分半
+      </p>
+      <p class="muted">
+        视频章节顺序：<strong>安装 Node.js → 安装本体 → 申请 API Key → 桌面快捷方式</strong>，
+        和本节的步骤基本一一对应，卡在哪一步就跳到对应时间点看录屏。
+      </p>
     </div>
 
     <!-- ================= 02 ================= -->
@@ -964,7 +879,7 @@
         <text class="svg-mono svg-faint" x="196" y="83" font-size="13">Input 13.2K tok · Output 587 tok</text>
         <text class="svg-sans svg-faint" x="28" y="118" font-size="11.5">界面底部状态栏（依据视频第 252 秒的真实画面重绘）</text>
       </svg>
-      <figcaption><b>图 7</b>　界面底部的状态栏，一眼就能看到缓存命中率</figcaption>
+      <figcaption><b>图 1</b>　界面底部的状态栏，一眼就能看到缓存命中率</figcaption>
     </figure>
 
     <p class="faint">
@@ -1394,12 +1309,12 @@
       <li><a href="https://api-docs.deepseek.com/zh-cn/quick_start/pricing" target="_blank" rel="noopener">模型 &amp; 价格</a>——各模型的实时定价</li>
       <li><a href="https://api-docs.deepseek.com/zh-cn/quick_start/token_usage" target="_blank" rel="noopener">Token 用量计算</a>——换算比例与离线估算工具</li>
       <li><a href="https://platform.deepseek.com/" target="_blank" rel="noopener">DeepSeek 开放平台</a>——申请 API Key 与查看账单</li>
-      <li><a href="https://www.bilibili.com/video/BV1f4gP6iEYK/" target="_blank" rel="noopener">手把手安装 deepseek-harness</a>——B 站视频（UP 主：乘黑鲸渡红海），本指南第 01 节的 Windows 安装流程、以及图 5、图 7 的画面依据参考了它</li>
+      <li><a href="https://www.bilibili.com/video/BV1f4gP6iEYK/" target="_blank" rel="noopener">手把手安装 deepseek-harness</a>——B 站视频（UP 主：乘黑鲸渡红海），本指南第 01 节的安装流程、以及图 1 的画面依据参考了它</li>
       <li><a href="https://dl.acm.org/doi/10.1145/3442188.3445922" target="_blank" rel="noopener">On the Dangers of Stochastic Parrots</a>——「随机鹦鹉」这个说法的出处（FAccT 2021 论文）</li>
     </ul>
     <p class="faint">
-      说明：本页所有插图均为依据公开资料与视频画面<strong>自行绘制的示意图</strong>，
-      不是原始截图，仅用于说明操作位置与界面结构。
+      说明：本页插图是依据公开资料与视频画面<strong>自行绘制的示意图</strong>，
+      不是原始截图，仅用于说明界面结构。
     </p>
 
     <footer>
