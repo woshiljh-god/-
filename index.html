@@ -427,8 +427,8 @@
     <!-- ================= 01 ================= -->
     <h2 id="start">01 · 安装与上手</h2>
     <p class="muted">
-      这一节按 B 站视频《手把手安装 deepseek-harness》的流程整理（Windows 环境），
-      视频里提到的坑点单独标了出来。
+      下面按 Windows 系统，把「装环境 → 跑起来 → 配上密钥」一步步说清楚，
+      新手容易卡住的地方单独标了出来。
     </p>
 
     <ol class="steps">
@@ -436,7 +436,7 @@
         <strong>安装 Node.js</strong>
         dsh 本身是 Node.js 程序，<strong>必须先装运行环境</strong>，不然后面跑不起来。
         到 <a href="https://nodejs.org/" target="_blank" rel="noopener">nodejs.org</a> 下载 LTS 版本，一路「下一步」即可。
-        <p class="muted">安装时可以顺手改路径：视频里建议把安装目录从 C 盘改到 D 盘，别把系统盘塞满。
+        <p class="muted">安装时可以顺手改路径：建议把安装目录从 C 盘改到 D 盘，别把系统盘塞满。
         装完在命令行输入 <code>node -v</code>，能显示版本号就算成功。</p>
       </li>
       <li>
@@ -456,16 +456,17 @@
         <div class="card note">
           <p><strong>为什么要加 <code>--verbose</code>？</strong></p>
           <p>
-            这是视频作者特意加的，他本人的原话是：<strong>「加 <code>--verbose</code> 可以让小白看到代码在跑，提供情绪价值。」</strong>
-          </p>
-          <p>
             说人话就是：第一次运行要下载一大堆依赖包，<strong>不加这个参数，终端会长时间一片空白，看起来像卡死了</strong>，
             新手很容易误以为没反应，于是反复按键甚至强行关窗口。加上之后下载日志会不停滚动，
-            你能清楚看到「它在干活、下到哪一步了」。它<strong>只影响日志的啰嗦程度，不影响安装结果</strong>，去掉也能正常装。
+            你能清楚看到「它在干活、下到哪一步了」。
+          </p>
+          <p>
+            很多安装教程都会特意把它加上，理由也很实在：<strong>让新手看得见「代码真的在跑」，
+            心里有底，不会对着一个不动的窗口干着急</strong>。它<strong>只影响日志的啰嗦程度，不影响安装结果</strong>，去掉也能正常装。
           </p>
         </div>
         <div class="card note warn">
-          <p><strong>如果一直不动、或者慢到无法接受：</strong>换成国内镜像源再执行一次（视频里给的补救办法）：</p>
+          <p><strong>如果一直不动、或者慢到无法接受：</strong>换成国内镜像源再执行一次（国内网络常用这个办法）：</p>
           <div class="code-block">
             <pre><code>npx --verbose --registry=https://registry.npmmirror.com @deepseek-ai/dsh web</code></pre>
           </div>
@@ -514,19 +515,36 @@
     </ol>
 
     <h3>想双击就打开？做个桌面快捷方式</h3>
-    <p>每次都开黑框敲命令太麻烦。视频最后一段给了个很实用的做法：</p>
+    <p>
+      每次都开黑框敲命令太麻烦。做一个桌面快捷方式，以后双击就能启动——
+      不用改文件后缀，还能顺便起个好听的名字。
+    </p>
     <ol>
-      <li>桌面右键 → <strong>新建 → 文本文档</strong>。</li>
-      <li>打开它，把 <code>npx --verbose @deepseek-ai/dsh web</code> 这一行粘进去，保存并关闭。</li>
-      <li>把文件名后缀从 <code>.txt</code> 改成 <code>.bat</code>（需要先在文件资源管理器里打开「查看 → 显示 → 文件扩展名」才改得动）。</li>
-      <li>双击这个 <code>.bat</code>，dsh 就启动了。</li>
+      <li>桌面空白处右键 → <strong>新建 → 快捷方式</strong>。</li>
+      <li>
+        在「请键入对象的位置」这一栏，粘贴下面这行：
+        <div class="code-block">
+          <pre><code>cmd /k "npx --verbose @deepseek-ai/dsh web"</code></pre>
+        </div>
+      </li>
+      <li>点 <strong>下一步</strong>，在「键入该快捷方式的名称」里给它取个名字，比如 <strong>「启动 DSH」</strong>，点 <strong>完成</strong>。</li>
+      <li>桌面上就多出一个图标，以后双击它就能启动 dsh。</li>
     </ol>
+    <p class="muted">
+      命令开头的 <code>cmd /k</code> 是「打开命令行并让窗口保持不关」的意思——dsh 要一直跑着，窗口不能关；
+      万一启动失败，窗口也会停在那里让你看清报错，而不是一闪而过。
+    </p>
     <div class="card note warn">
-      <p><strong>两个常见坑：</strong></p>
+      <p><strong>三个常见坑：</strong></p>
       <ul>
         <li><strong>双击闪退或打不开：</strong>多半是之前那个黑框还开着（dsh 已经在运行）。先把旧黑框关掉，再双击。</li>
-        <li><strong>想换图标：</strong>右键该文件 → 属性 → 更改图标即可，也可以自己把图片转成 <code>.ico</code> 再选。</li>
+        <li><strong>想换图标：</strong>右键快捷方式 → 属性 → 更改图标，系统自带的随便挑；想用自己的图片，先把图片转成 <code>.ico</code>。</li>
+        <li><strong>想让它默认打开某个项目：</strong>右键快捷方式 → 属性，把「起始位置」填成那个项目文件夹，dsh 启动后的默认工作区就是它。</li>
       </ul>
+    </div>
+    <div class="card note">
+      <p><strong>如果第 2 步粘贴后提示「找不到对象」：</strong>把那一栏先填 <code>cmd.exe</code>，一路点完「下一步」「完成」；
+      再右键这个快捷方式 → 属性，在「<strong>目标</strong>」一栏的末尾敲一个空格，补上 <code>/k "npx --verbose @deepseek-ai/dsh web"</code>，确定即可。</p>
     </div>
 
     <div class="card note">
@@ -554,19 +572,18 @@
     </div>
 
     <div class="card note">
-      <p><strong>想看完整的详细步骤？直接看视频</strong></p>
+      <p><strong>想看完整的详细步骤？推荐参考这个视频</strong></p>
       <p>
-        上面这一节就是按下面这个视频整理的。文字的好处是方便查命令、对着抄；
-        而视频里有<strong>完整的录屏操作</strong>——鼠标点哪里、窗口长什么样、每一步大概等多久，
-        第一次装的时候对照着走一遍会踏实很多。
+        上面的文字适合查命令、对着抄；如果你更喜欢跟着录屏一步步走，
+        下面这个视频很值得参考——鼠标点哪里、窗口长什么样、每一步大概等多久，看一遍会直观很多。
       </p>
       <p>
         <a href="https://www.bilibili.com/video/BV1f4gP6iEYK/" target="_blank" rel="noopener">【手把手安装 deepseek-harness】</a>
         ——B 站，UP 主「乘黑鲸渡红海」，时长约 6 分半
       </p>
       <p class="muted">
-        视频章节顺序：<strong>安装 Node.js → 安装本体 → 申请 API Key → 桌面快捷方式</strong>，
-        和本节的步骤基本一一对应，卡在哪一步就跳到对应时间点看录屏。
+        视频大致按 <strong>安装 Node.js → 安装本体 → 申请 API Key → 桌面快捷方式</strong> 的顺序讲，
+        可以和本节搭配着看：文字用来查命令，视频用来看实际操作。
       </p>
     </div>
 
@@ -877,7 +894,7 @@
         <rect class="svg-hl" x="24" y="62" width="152" height="30" rx="6"/>
         <text class="svg-mono svg-accent" x="38" y="83" font-size="13.5" font-weight="600">Cache hit 0%</text>
         <text class="svg-mono svg-faint" x="196" y="83" font-size="13">Input 13.2K tok · Output 587 tok</text>
-        <text class="svg-sans svg-faint" x="28" y="118" font-size="11.5">界面底部状态栏（依据视频第 252 秒的真实画面重绘）</text>
+        <text class="svg-sans svg-faint" x="28" y="118" font-size="11.5">界面底部的状态栏（示意图）</text>
       </svg>
       <figcaption><b>图 1</b>　界面底部的状态栏，一眼就能看到缓存命中率</figcaption>
     </figure>
@@ -1309,16 +1326,16 @@
       <li><a href="https://api-docs.deepseek.com/zh-cn/quick_start/pricing" target="_blank" rel="noopener">模型 &amp; 价格</a>——各模型的实时定价</li>
       <li><a href="https://api-docs.deepseek.com/zh-cn/quick_start/token_usage" target="_blank" rel="noopener">Token 用量计算</a>——换算比例与离线估算工具</li>
       <li><a href="https://platform.deepseek.com/" target="_blank" rel="noopener">DeepSeek 开放平台</a>——申请 API Key 与查看账单</li>
-      <li><a href="https://www.bilibili.com/video/BV1f4gP6iEYK/" target="_blank" rel="noopener">手把手安装 deepseek-harness</a>——B 站视频（UP 主：乘黑鲸渡红海），本指南第 01 节的安装流程、以及图 1 的画面依据参考了它</li>
+      <li><a href="https://www.bilibili.com/video/BV1f4gP6iEYK/" target="_blank" rel="noopener">手把手安装 deepseek-harness</a>——B 站视频（UP 主：乘黑鲸渡红海），一份讲得比较细的 Windows 安装教程，可作为本指南第 01 节的补充参考</li>
       <li><a href="https://dl.acm.org/doi/10.1145/3442188.3445922" target="_blank" rel="noopener">On the Dangers of Stochastic Parrots</a>——「随机鹦鹉」这个说法的出处（FAccT 2021 论文）</li>
     </ul>
     <p class="faint">
-      说明：本页插图是依据公开资料与视频画面<strong>自行绘制的示意图</strong>，
+      说明：本页插图是依据公开资料<strong>自行绘制的示意图</strong>，
       不是原始截图，仅用于说明界面结构。
     </p>
 
     <footer>
-      <p>本指南由 DSH 会话生成于 2026-09-16，最近更新 2026-09-17。内容依据 DeepSeek 官方文档、官方 API 文档，以及 B 站视频《手把手安装 deepseek-harness》核对整理。</p>
+      <p>本指南由 DSH 会话生成于 2026-09-16，最近更新 2026-09-17。内容依据 DeepSeek 官方文档与官方 API 文档整理核对。</p>
       <p>DeepSeek Harness 处于开发者预览阶段，版本迭代较快，具体功能与价格请以官方页面为准。</p>
     </footer>
   </main>
